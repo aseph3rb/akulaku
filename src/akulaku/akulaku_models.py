@@ -1,0 +1,17 @@
+from enum import IntEnum
+
+
+class AkuLakuStatus(IntEnum):
+    PENDING = 1
+    REFUND = 91
+    FAILED = 90
+    CANCELLED = 92
+    SUCCESS = 100
+    RECEIPTED = 101
+
+AK_PENDING = 1
+AK_REFUND = 91
+AK_FAILED = 90
+AK_CANCELLLED = 92
+AK_SUCCESS = 100
+AK_RECEIPTED = 101
