@@ -9,22 +9,23 @@ from .akulaku_helpers import on_payment_updated
 log = logging.getLogger('akulaku')
 
 
-def validate_response_signature(sign, content):
+def validate_response_signature(expected_signature, response_signature):
     """ to validate response signature
-    :param 'str' sign:
-    :param 'str' content:
+    :param 'str' expected_signature:
+    :param 'str' response_content:
     :return: bool
     """
-    akulaku_payment = AkulakuPayment(
-        app_id=settings.AKULAKU['APP_ID'],
-        secret_key=settings.AKULAKU['SECRET_KEY'],
-        use_sandbox=settings.DEBUG
-    )
-
-    return sign == akulaku_payment.get_sign(content)
+    return expected_signature == response_signature
 
 
-def get_sign(app_id, secret_key, content):
+def generate_signature(app_id, secret_key, content):
+    """ Create a signature for an Akulaku api request
+
+    :param `str` app_id: A unique app ID given by Akulaku
+    :param `str` secret_key: A unique secret key given by Akulaku
+    :param `str` content: The stringified content of the request.
+    :return: str
+    """
     content = f'{app_id}{secret_key}{content}'
     has_sha512 = hashlib.sha512(content.encode()).digest()
     encoded = base64.b64encode(has_sha512)
@@ -33,10 +34,7 @@ def get_sign(app_id, secret_key, content):
     return encoded_string.replace("+", "-").replace("/", "_").replace("=", "")
 
 
-
-
-
-class AkulakuPayment:
+class AkulakuGateway:
 
     def __init__(self, app_id, secret_key, use_sandbox=False):
         self.app_id = app_id
@@ -48,8 +46,8 @@ class AkulakuPayment:
         return "http://testmall.akulaku.com" if self.use_sandbox \
             else "https://mall.akulaku.com"
 
-    def get_url_akulaku(self, order_number):
-        sign = self.get_sign(str(order_number))
+    def get_url_akulaku(self, app_id, secret_key, order_number):
+        sign =generate_signature(app_id, secret_key, order_number)
         params = f'appId={self.app_id}&refNo={order_number}&sign={sign}&lang=id'
         return f'{self.base_url}/v2/openPay.html?{params}'
 
