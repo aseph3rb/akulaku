@@ -47,7 +47,7 @@ class AkulakuGateway:
             else "https://mall.akulaku.com"
 
     def get_url_akulaku(self, app_id, secret_key, order_number):
-        sign =generate_signature(app_id, secret_key, order_number)
+        sign = generate_signature(app_id, secret_key, order_number)
         params = f'appId={self.app_id}&refNo={order_number}&sign={sign}&lang=id'
         return f'{self.base_url}/v2/openPay.html?{params}'
 
@@ -78,7 +78,7 @@ class AkulakuGateway:
             "city": shipping_address.regency_district.name,
             "street": street,
             "postcode": shipping_address.postcode,
-            "sign": self.get_sign(content),
+            "sign": generate_signature(self.app_id, self.secret_key, content),
             "details": str(details),
         }
 
