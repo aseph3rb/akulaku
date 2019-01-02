@@ -1,9 +1,10 @@
 import base64
 import hashlib
 import logging
-# import requests
+import requests
 import json
 
+from akulaku.exceptions import AkulakuError
 from .akulaku_helpers import on_payment_updated
 
 log = logging.getLogger('akulaku')
@@ -51,44 +52,26 @@ class AkulakuGateway:
         params = f'appId={self.app_id}&refNo={order_number}&sign={sign}&lang=id'
         return f'{self.base_url}/v2/openPay.html?{params}'
 
-    def get_akulaku_response(self, order_number, user, shipping_address, basket):
-        line = basket.lines.select_related('product').first()
-        details = [{
-            "skuId": line.product.stockrecords.first().partner_sku,
-            "skuName": line.product.title,
-            "unitPrice": int(line.unit_price_excl_tax),
-            "qty": line.quantity,
-        }]
+    def generate_new_order_akulaku(self, order_request):
+        """
 
-        username = f'{user.first_name} {user.last_name}'
-        street = shipping_address.line1 + shipping_address.line2 + shipping_address.line3 + shipping_address.line4
-        total_price = int(line.unit_price_excl_tax * line.quantity)
+        :param `akulaku.akulaku_models.NewOrderRequest` order_request:
+        :return:
+        :rtype: int
+        """
+        data = order_request.serialize()
+        content = (f'{order_request.ref_number}{order_request.ref_number}{order_request.user_account}'
+                   f'{order_request.receiver_name}{order_request.receiver_phone}{order_request.province}'
+                   f'{order_request.city}{order_request.street}{order_request.postcode}{order_request.details}')
 
-        content = (f'{order_number}{total_price}{user.id}{username}{user.phone}{shipping_address.province.name}'
-                   f'{shipping_address.regency_district.name}{street}{shipping_address.postcode}{details}')
-
-        data = {
+        data.update({
             "appId": self.app_id,
-            "refNo": str(order_number),
-            "totalPrice": str(total_price),
-            "userAccount": str(user.id),
-            "receiverName": username,
-            "receiverPhone": user.phone,
-            "province": shipping_address.province.name,
-            "city": shipping_address.regency_district.name,
-            "street": street,
-            "postcode": shipping_address.postcode,
-            "sign": generate_signature(self.app_id, self.secret_key, content),
-            "details": str(details),
-        }
+            "sign": generate_signature(self.app_id, self.secret_key, content)
+        })
 
-        return self.generate_order(data, order_number)
-
-    def generate_order(self, data, order_number):
         try:
             url = f'{self.base_url}/api/json/public/openpay/new.do'
             header = {
-                'content-type': "multipart/form-data;",
                 'Content-Type': "application/x-www-form-urlencoded"
             }
 
@@ -98,14 +81,10 @@ class AkulakuGateway:
             if json_response["success"]:
                 return json_response['data']['orderId']
             else:
-                log.error(f"Failed to create new akulaku payment for order because data not valid")
-                if json_response.get('errCode') == 'openpay.0002':
-                    return json_response.get('errCode')
+                raise AkulakuError(f'AkuLaku return an error: code={json_response.get("errCode")}')
 
-                raise UnableToTakePayment
-
-        except Exception as e:
-            log.exception(f"Failed to create new akulaku payment for order {order_number}")
+        except Exception:
+            log.exception(f"Failed to create new akulaku payment for order {order_request.ref_number}")
             raise
 
     def get_order(self, order_number):

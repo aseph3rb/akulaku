@@ -23,6 +23,7 @@ def step_impl(context):
         ).serialize()
     )
 
+
 @then("the order request is converted to a dictionary properly")
 def step_impl(context):
     assert context.serialized == {
@@ -38,6 +39,7 @@ def step_impl(context):
             "details": context.entity.details
     }
 
+
 @given("an OrderDetail with sku = {sku}, name = {name}, unit_price = {unit_price}, quantity = {quantity}")
 def step_impl(context, sku, name, unit_price, quantity):
     context.entity = OrderDetail(
@@ -46,6 +48,7 @@ def step_impl(context, sku, name, unit_price, quantity):
         unit_price=unit_price,
         quantity=quantity
     )
+
 
 @when("I serialize the object")
 def step_impl(context):

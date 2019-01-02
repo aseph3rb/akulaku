@@ -27,6 +27,7 @@ class OrderDetail:
                 f'"unitPrice": {self.unit_price}, '
                 f'"qty": {self.quantity}}}]')
 
+
 class NewOrderRequest:
     def __init__(self,
                  ref_number,
@@ -49,9 +50,14 @@ class NewOrderRequest:
         self.city = city
         self.street = street
         self.postcode = postcode
-        self.details = details
+        self.details = details if type(details) is str else details.serialize()
 
     def serialize(self):
+        """
+
+        :return:
+        :rtype: dict
+        """
         return {
             "refNo": self.ref_number,
             "totalPrice": self.total_price,
