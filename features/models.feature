@@ -7,7 +7,7 @@ Feature: #Enter feature name here
     When I serialize the object
     Then the OrderDetail is serialized correctly
 
-  Scenario: # Enter scenario name here
+  Scenario: NewOrderRequest serialization
     Given a create order request
     When I serialize the object
     Then the order request is converted to a dictionary properly

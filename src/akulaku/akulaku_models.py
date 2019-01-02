@@ -40,20 +40,27 @@ class NewOrderRequest:
                  postcode,
                  details
                  ):
-            pass
+        self.ref_number = ref_number,
+        self.total_price = total_price,
+        self.user_account = user_account,
+        self.receiver_name = receiver_name
+        self.receiver_phone = receiver_phone
+        self.province = province
+        self.city = city
+        self.street = street
+        self.postcode = postcode
+        self.details = details
 
-    def serizalize(self):
-        # return {
-        #     "appId": app_id,
-        #     "refNo": ref_number,
-        #     "totalPrice": total_price,
-        #     "userAccount": user_account,
-        #     "receiverName": receiver_name,
-        #     "receiverPhone": receiver_phone,
-        #     "province": province,
-        #     "city": city,
-        #     "street": street,
-        #     "postcode": postcode,
-        #     "sign": signature,
-        #     "details": details,
-        # }
+    def serialize(self):
+        return {
+            "refNo": self.ref_number,
+            "totalPrice": self.total_price,
+            "userAccount": self.user_account,
+            "receiverName": self.receiver_name,
+            "receiverPhone": self.receiver_phone,
+            "province": self.province,
+            "city": self.city,
+            "street": self.street,
+            "postcode": self.postcode,
+            "details": self.details,
+        }

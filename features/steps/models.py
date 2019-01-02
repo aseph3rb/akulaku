@@ -7,7 +7,7 @@ from akulaku.akulaku_models import NewOrderRequest, OrderDetail
 def step_impl(context):
     context.entity = NewOrderRequest(
         ref_number='1001',
-        total_price='2000000',
+        total_price='600000',
         user_account='1',
         receiver_name='fuad',
         receiver_phone='085778869436',
@@ -27,15 +27,15 @@ def step_impl(context):
 def step_impl(context):
     assert context.serialized == {
             "refNo": context.entity.ref_number,
-            "totalPrice": total_price,
-            "userAccount": user_account,
-            "receiverName": receiver_name,
-            "receiverPhone": receiver_phone,
-            "province": province,
-            "city": city,
-            "street": street,
-            "postcode": postcode,
-            "details": details
+            "totalPrice": context.entity.total_price,
+            "userAccount": context.entity.user_account,
+            "receiverName": context.entity.receiver_name,
+            "receiverPhone": context.entity.receiver_phone,
+            "province": context.entity.province,
+            "city": context.entity.city,
+            "street": context.entity.street,
+            "postcode": context.entity.postcode,
+            "details": context.entity.details
     }
 
 @given("an OrderDetail with sku = {sku}, name = {name}, unit_price = {unit_price}, quantity = {quantity}")
